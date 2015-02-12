@@ -73,7 +73,16 @@ class ExecuteRequestTaskActor(interpreter: Interpreter) extends Actor with LogLi
                 Console.setErr(System.err)
               }""".trim)
             }
-            interpreter.interpret(executeRequest.code.trim)
+            val interpreterResult = interpreter.interpret(executeRequest.code.trim)
+            interpreterResult._1 match {
+              case Results.Success =>
+                (
+                  Results.Success,
+                  Left(interpreter.read(interpreter.mostRecentVar).getOrElse("").toString)
+                )
+              case _ =>
+                interpreterResult
+            }
           }
 
         logger.debug(s"Interpreter execution result was ${success}")
